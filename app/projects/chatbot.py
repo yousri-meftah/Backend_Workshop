@@ -4,12 +4,14 @@ from app.projects.chatbot_ai import ask_gemini
 from app.projects.chatbot_ai import summarize_conversation
 from app.projects.chatbot_db import create_conversation_in_db
 from app.projects.chatbot_db import create_user
+from app.projects.chatbot_db import delete_conversation
 from app.projects.chatbot_db import get_conversation_or_404
 from app.projects.chatbot_db import get_conversation_for_user_or_404
 from app.projects.chatbot_db import get_messages
 from app.projects.chatbot_db import get_user_by_token
 from app.projects.chatbot_db import list_conversations_from_db
 from app.projects.chatbot_db import login_user
+from app.projects.chatbot_db import rename_conversation
 from app.projects.chatbot_db import save_message
 from app.projects.chatbot_db import update_conversation
 
@@ -66,6 +68,22 @@ def get_conversation(conversation_id: int, token: str | None = Cookie(default=No
     conversation = get_conversation_or_404(conversation_id)
     conversation["messages"] = get_messages(conversation_id)
     return conversation
+
+
+@router.put("/conversations/{conversation_id}")
+def edit_conversation_title(
+    conversation_id: int,
+    token: str | None = Cookie(default=None),
+    title: str = Body(..., embed=True),
+):
+    user = get_user_by_token(token)
+    return rename_conversation(conversation_id, user["id"], title.strip())
+
+
+@router.delete("/conversations/{conversation_id}")
+def remove_conversation(conversation_id: int, token: str | None = Cookie(default=None)):
+    user = get_user_by_token(token)
+    return delete_conversation(conversation_id, user["id"])
 
 
 @router.post("/conversations/{conversation_id}/messages")

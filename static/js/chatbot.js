@@ -7,6 +7,10 @@ const conversationModal = document.getElementById("conversation-modal");
 const closeModalButton = document.getElementById("close-modal");
 const conversationForm = document.getElementById("conversation-form");
 const conversationTitleInput = document.getElementById("conversation-title");
+const renameModal = document.getElementById("rename-modal");
+const closeRenameModalButton = document.getElementById("close-rename-modal");
+const renameForm = document.getElementById("rename-form");
+const renameTitleInput = document.getElementById("rename-title");
 const authModal = document.getElementById("auth-modal");
 const logoutButton = document.getElementById("logout-button");
 const sendButton = chatForm.querySelector("button[type='submit']");
@@ -44,10 +48,15 @@ async function loadConversations() {
     const card = document.createElement("button");
     card.className = "conversation-card";
     card.dataset.id = conversation.id;
+    card.dataset.title = conversation.title;
     card.innerHTML = `
       <strong>${conversation.title}</strong>
       <div class="conversation-meta">${conversation.summary || "No summary yet."}</div>
       <div class="conversation-meta">${conversation.message_count} messages</div>
+      <div class="snippet-actions">
+        <span class="mini-btn" data-action="rename" data-id="${conversation.id}" data-title="${conversation.title}">Rename</span>
+        <span class="mini-btn" data-action="delete" data-id="${conversation.id}">Delete</span>
+      </div>
     `;
     conversationList.appendChild(card);
   });
@@ -119,6 +128,18 @@ function closeConversationModal() {
   conversationForm.reset();
 }
 
+function openRenameModal(id, title) {
+  activeConversationId = Number(id);
+  renameTitleInput.value = title || "";
+  renameModal.classList.remove("hidden");
+  renameTitleInput.focus();
+}
+
+function closeRenameModal() {
+  renameModal.classList.add("hidden");
+  renameForm.reset();
+}
+
 async function createConversation(event) {
   event.preventDefault();
   const title = conversationTitleInput.value.trim();
@@ -137,6 +158,43 @@ async function createConversation(event) {
   const conversation = await readJson(response);
   activeConversationId = conversation.id;
   closeConversationModal();
+  await loadConversations();
+}
+
+async function renameConversation(event) {
+  event.preventDefault();
+
+  const response = await fetch(apiUrl(`/project2/conversations/${activeConversationId}`), {
+    credentials: "include",
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title: renameTitleInput.value.trim() }),
+  });
+  if (await stopIfUnauthorized(response)) {
+    return;
+  }
+
+  closeRenameModal();
+  await loadConversations();
+  await loadConversation(activeConversationId);
+}
+
+async function deleteConversation(id) {
+  const response = await fetch(apiUrl(`/project2/conversations/${id}`), {
+    credentials: "include",
+    method: "DELETE",
+  });
+  if (await stopIfUnauthorized(response)) {
+    return;
+  }
+
+  if (Number(id) === Number(activeConversationId)) {
+    activeConversationId = null;
+    chatMessages.innerHTML = '<div class="bubble assistant">Conversation deleted.</div>';
+  }
+
   await loadConversations();
 }
 
@@ -181,7 +239,21 @@ async function logout() {
 }
 
 conversationList.addEventListener("click", (event) => {
-  const card = event.target.closest("[data-id]");
+  const actionTarget = event.target.closest("[data-action]");
+  if (actionTarget) {
+    if (actionTarget.dataset.action === "rename") {
+      event.stopPropagation();
+      openRenameModal(actionTarget.dataset.id, actionTarget.dataset.title);
+      return;
+    }
+    if (actionTarget.dataset.action === "delete") {
+      event.stopPropagation();
+      deleteConversation(actionTarget.dataset.id);
+      return;
+    }
+  }
+
+  const card = event.target.closest(".conversation-card");
   if (!card) {
     return;
   }
@@ -195,6 +267,13 @@ conversationForm.addEventListener("submit", createConversation);
 conversationModal.addEventListener("click", (event) => {
   if (event.target === conversationModal) {
     closeConversationModal();
+  }
+});
+renameForm.addEventListener("submit", renameConversation);
+closeRenameModalButton.addEventListener("click", closeRenameModal);
+renameModal.addEventListener("click", (event) => {
+  if (event.target === renameModal) {
+    closeRenameModal();
   }
 });
 logoutButton.addEventListener("click", logout);

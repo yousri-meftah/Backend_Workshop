@@ -244,3 +244,30 @@ def update_conversation(conversation_id: int, title: str, summary: str):
     )
     connection.commit()
     connection.close()
+
+
+def rename_conversation(conversation_id: int, user_id: int, title: str):
+    connection = get_connection()
+    connection.execute(
+        "UPDATE conversations SET title = ? WHERE id = ? AND user_id = ?",
+        (title, conversation_id, user_id),
+    )
+    connection.commit()
+    connection.close()
+    return get_conversation_for_user_or_404(conversation_id, user_id)
+
+
+def delete_conversation(conversation_id: int, user_id: int):
+    connection = get_connection()
+    conversation = connection.execute(
+        "SELECT id FROM conversations WHERE id = ? AND user_id = ?",
+        (conversation_id, user_id),
+    ).fetchone()
+    if not conversation:
+        connection.close()
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    connection.execute("DELETE FROM messages WHERE conversation_id = ?", (conversation_id,))
+    connection.execute("DELETE FROM conversations WHERE id = ? AND user_id = ?", (conversation_id, user_id))
+    connection.commit()
+    connection.close()
+    return {"deleted": True}

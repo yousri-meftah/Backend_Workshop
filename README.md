@@ -30,6 +30,10 @@ GEMINI_API_KEY=your_key_here
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
+Get the key from Google AI Studio:
+- [Google AI Studio](https://ai.google.dev/aistudio)
+- [API key setup guide](https://ai.google.dev/tutorials/setup)
+
 ## Run
 
 ```bash
@@ -47,6 +51,37 @@ Use localhost consistently for login, frontend, and Swagger docs.
 
 ```text
 The chatbot creates chatbot.db automatically.
+```
+
+## Chatbot DB
+
+```mermaid
+erDiagram
+    USERS ||--o{ CONVERSATIONS : owns
+    CONVERSATIONS ||--o{ MESSAGES : contains
+
+    USERS {
+        int id
+        string username
+        string password
+        string token
+    }
+
+    CONVERSATIONS {
+        int id
+        int user_id
+        string title
+        string summary
+        string created_at
+    }
+
+    MESSAGES {
+        int id
+        int conversation_id
+        string role
+        string content
+        string created_at
+    }
 ```
 
 ## Open

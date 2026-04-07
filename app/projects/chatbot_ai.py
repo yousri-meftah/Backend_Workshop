@@ -22,6 +22,7 @@ def build_chat_prompt(messages: list[dict], lang: str):
         "Conversation:",
     ]
     for message in messages:
+        print("mes = ",message)
         lines.append(f"{message['role']}: {message['content']}")
     return "\n".join(lines)
 
