@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a href="/" class="back-link">Home</a>
+      <div>
+        <span class="eyebrow">Project 1</span>
+        <h1>Todo CRUD</h1>
+      </div>
+    </header>
+
+    <main class="two-column">
+      <section class="panel">
+        <h2>Add task</h2>
+        <form id="todo-form" class="stack">
+          <input id="todo-input" class="field" type="text" placeholder="Explain HTTP verbs">
+          <button class="primary-btn" type="submit">Create todo</button>
+        </form>
+        <div id="todo-message" class="message"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Todo list</h2>
+          <button id="reload-todos" class="ghost-btn" type="button">Reload</button>
+        </div>
+        <div id="todo-list" class="stack"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/todo.js"></script>
+</body>
+</html>

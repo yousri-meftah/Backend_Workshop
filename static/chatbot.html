@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a href="/" class="back-link">Home</a>
+      <div>
+        <span class="eyebrow">Project 2</span>
+        <h1>Chatbot Demo</h1>
+      </div>
+      <button id="logout-button" class="ghost-btn" type="button">Logout</button>
+    </header>
+
+    <main class="chat-layout">
+      <aside class="panel">
+        <div class="section-head">
+          <h2>Conversations</h2>
+          <button id="new-conversation" class="ghost-btn" type="button">New</button>
+        </div>
+        <div id="conversation-list" class="stack"></div>
+      </aside>
+
+      <section class="panel chat-panel">
+        <div id="chat-messages" class="chat-messages"></div>
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" class="field" type="text" placeholder="What is CRUD?">
+          <button class="primary-btn" type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div id="conversation-modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="section-head">
+        <h2>New conversation</h2>
+        <button id="close-modal" class="ghost-btn" type="button">Close</button>
+      </div>
+      <form id="conversation-form" class="stack">
+        <input id="conversation-title" class="field" type="text" placeholder="Backend revision chat">
+        <button class="primary-btn" type="submit">Create conversation</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="auth-modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="section-head">
+        <h2>Login required</h2>
+      </div>
+      <p class="subtle">You need to login before using the chatbot.</p>
+      <a href="/chatbot-auth" class="primary-link">Go to login page</a>
+    </div>
+  </div>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/chatbot.js"></script>
+</body>
+</html>

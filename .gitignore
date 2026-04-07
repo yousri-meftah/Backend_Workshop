@@ -1,0 +1,13 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+app/projects/.env
+chatbot.db
+express_workshop/node_modules/
+express_workshop/.env
+express_workshop/chatbot.db
+.DS_Store

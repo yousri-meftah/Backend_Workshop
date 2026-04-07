@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Base Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a href="/" class="back-link">Home</a>
+      <div>
+        <span class="eyebrow">Project 3</span>
+        <h1>Knowledge Base Manager</h1>
+      </div>
+    </header>
+
+    <main class="two-column">
+      <section class="panel">
+        <h2>New article</h2>
+        <p class="subtle">A small internal knowledge base for backend tips. This project has four backend-side API contract mistakes for the workshop.</p>
+        <form id="snippet-form" class="stack">
+          <input id="snippet-title" class="field" type="text" placeholder="Article title">
+          <input id="snippet-tag" class="field" type="text" placeholder="Category">
+          <textarea id="snippet-content" class="field area" placeholder="Write a short backend tip"></textarea>
+          <button class="primary-btn" type="submit">Save article</button>
+        </form>
+        <div id="snippet-message" class="message"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Knowledge base</h2>
+          <button id="load-snippets" class="ghost-btn" type="button">Load</button>
+        </div>
+        <div id="snippet-list" class="stack"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-card">
+      <div class="section-head">
+        <h2>Edit article</h2>
+        <button id="close-edit-modal" class="ghost-btn" type="button">Close</button>
+      </div>
+      <form id="edit-form" class="stack">
+        <input id="edit-title" class="field" type="text" placeholder="Article title">
+        <input id="edit-tag" class="field" type="text" placeholder="Category">
+        <textarea id="edit-content" class="field area" placeholder="Update the backend tip"></textarea>
+        <button class="primary-btn" type="submit">Update article</button>
+      </form>
+      <div id="edit-message" class="message"></div>
+    </div>
+  </div>
+
+  <script src="/static/js/config.js"></script>
+  <script src="/static/js/api-lab.js"></script>
+</body>
+</html>
