@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 from app.projects.chatbot import router as chatbot_router
 from app.projects.chatbot_db import init_db as init_chatbot_db
+from app.projects.quizzes import router as quizzes_router
 from app.projects.snippets import router as snippets_router
 from app.projects.todos import router as todos_router
 
@@ -31,6 +32,7 @@ app.add_middleware(
 app.include_router(todos_router, prefix="/project1", tags=["project1"])
 app.include_router(chatbot_router, prefix="/project2", tags=["project2"])
 app.include_router(snippets_router, prefix="/project3", tags=["project3"])
+app.include_router(quizzes_router, prefix="/project4", tags=["project4"])
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -65,3 +67,17 @@ def chatbot_auth_page():
 def api_lab_page():
     return FileResponse(STATIC_DIR / "api-lab.html")
 
+
+@app.get("/quiz")
+def quiz_page():
+    return FileResponse(STATIC_DIR / "quiz-start.html")
+
+
+@app.get("/quiz/result")
+def quiz_result_page():
+    return FileResponse(STATIC_DIR / "quiz-result.html")
+
+
+@app.get("/quiz/{question_id}")
+def quiz_question_page(question_id: int):
+    return FileResponse(STATIC_DIR / "quiz-question.html")

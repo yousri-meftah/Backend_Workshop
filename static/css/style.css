@@ -105,7 +105,7 @@ a {
 
 .grid-links {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -258,7 +258,9 @@ a {
 
 .todo-card,
 .conversation-card,
-.snippet-card {
+.snippet-card,
+.quiz-card,
+.quiz-session-card {
   padding: 16px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.72);
@@ -328,6 +330,68 @@ a {
 
 .message {
   min-height: 22px;
+}
+
+.quiz-layout {
+  align-items: start;
+}
+
+.quiz-session-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.quiz-session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.participant-badge {
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(52, 152, 219, 0.12);
+  color: #1f5f8b;
+}
+
+.hidden {
+  display: none;
+}
+
+.quiz-question-head {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 10px;
+}
+
+.quiz-option {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(24, 33, 38, 0.05);
+}
+
+.quiz-answer {
+  margin-top: 14px;
+  font-size: 0.95rem;
+}
+
+.quiz-answer.correct {
+  color: #0d7a46;
+}
+
+.quiz-answer.wrong {
+  color: #ad3f2f;
 }
 
 .modal {

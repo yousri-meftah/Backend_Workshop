@@ -21,13 +21,12 @@ router = APIRouter()
 
 @router.post("/register")
 def register(
-    response: Response,
     username: str = Body(..., embed=True),
     password: str = Body(..., embed=True),
 ):
     user = create_user(username.strip(), password.strip())
-    response.set_cookie("token", user["token"], httponly=True, samesite="lax")
-    return {"id": user["id"], "username": user["username"], "token": user["token"]}
+    
+    return {"id": user["id"], "username": user["username"]}
 
 
 @router.post("/login")

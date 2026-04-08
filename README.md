@@ -92,5 +92,24 @@ http://localhost:8000/todo
 http://localhost:8000/chatbot
 http://localhost:8000/chatbot-auth
 http://localhost:8000/api-lab
+http://localhost:8000/quiz
+http://localhost:8000/quiz/1
 http://localhost:8000/docs
+```
+
+## Quiz Flow (Project 4)
+
+```text
+GET /project4/sessions/1
+GET /project4/sessions/1/quiz/1
+GET /project4/sessions/1/quiz/2
+...
+GET /project4/sessions/1/quiz/15
+```
+
+## Quiz Data
+
+```text
+Edit quiz session and questions in:
+app/projects/quiz_seed.py
 ```
