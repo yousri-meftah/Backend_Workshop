@@ -1,180 +1,22 @@
+import base64
+import json
+
 from fastapi import HTTPException
 
 
-QUIZ_SESSION = {
-    "id": 1,
-    "title": "Backend Session Warmup",
-    "description": "15 workshop questions on DNS, HTTPS, HTTP methods, APIs, and backend fundamentals.",
-    "topic": "Backend Basics",
-}
+ENCODED_QUIZ_DATA = (
+    "eyJzZXNzaW9uIjp7ImlkIjoxLCJ0aXRsZSI6IkJhY2tlbmQgU2Vzc2lvbiBXYXJtdXAiLCJkZXNjcmlwdGlvbiI6IjE1IHdvcmtzaG9wIHF1ZXN0aW9ucyBvbiBETlMsIEhUVFBTLCBIVFRQIG1ldGhvZHMsIEFQSXMsIGFuZCBiYWNrZW5kIGZ1bmRhbWVudGFscy4iLCJ0b3BpYyI6IkJhY2tlbmQgQmFzaWNzIn0sInF1ZXN0aW9ucyI6W3sicG9zaXRpb24iOjEsInF1ZXN0aW9uIjoiV2hhdCBkb2VzIEROUyBtYWlubHkgZG8gb24gdGhlIGludGVybmV0PyIsIm9wdGlvbnMiOnsiQSI6IkVuY3J5cHQgdGhlIGRhdGEgYmV0d2VlbiB0aGUgYnJvd3NlciBhbmQgdGhlIHNlcnZlciIsIkIiOiJUcmFuc2xhdGUgYSBkb21haW4gbmFtZSBpbnRvIGFuIElQIGFkZHJlc3MiLCJDIjoiU3RvcmUgZnJvbnRlbmQgZmlsZXMgaW4gdGhlIGJyb3dzZXIgY2FjaGUiLCJEIjoiQ3JlYXRlIGRhdGFiYXNlIHRhYmxlcyBmb3IgYW4gYXBwbGljYXRpb24ifSwiY29ycmVjdF9vcHRpb24iOiJCIn0seyJwb3NpdGlvbiI6MiwicXVlc3Rpb24iOiJXaGljaCBwcm90b2NvbCBpcyBjb21tb25seSB1c2VkIHRvIGxvYWQgYSBzZWN1cmUgd2Vic2l0ZT8iLCJvcHRpb25zIjp7IkEiOiJGVFAiLCJCIjoiU01UUCIsIkMiOiJIVFRQUyIsIkQiOiJTU0gifSwiY29ycmVjdF9vcHRpb24iOiJDIn0seyJwb3NpdGlvbiI6MywicXVlc3Rpb24iOiJXaGF0IGlzIHRoZSBtYWluIHB1cnBvc2Ugb2YgSFRUUFM/Iiwib3B0aW9ucyI6eyJBIjoiVG8gY29tcHJlc3MgSlNPTiByZXNwb25zZXMiLCJCIjoiVG8gbWFrZSBhIHNpdGUgZmFzdGVyIHRoYW4gYWxsIEhUVFAgcmVxdWVzdHMiLCJDIjoiVG8gc2VjdXJlIGNvbW11bmljYXRpb24gd2l0aCBlbmNyeXB0aW9uIGFuZCBjZXJ0aWZpY2F0ZSB2YWxpZGF0aW9uIiwiRCI6IlRvIHJlcGxhY2UgRE5TIHJlY29yZHMifSwiY29ycmVjdF9vcHRpb24iOiJDIn0seyJwb3NpdGlvbiI6NCwicXVlc3Rpb24iOiJXaGljaCBIVFRQIG1ldGhvZCBpcyB1c3VhbGx5IHVzZWQgdG8gY3JlYXRlIGEgbmV3IHJlc291cmNlPyIsIm9wdGlvbnMiOnsiQSI6IkdFVCIsIkIiOiJQT1NUIiwiQyI6IkRFTEVURSIsIkQiOiJIRUFEIn0sImNvcnJlY3Rfb3B0aW9uIjoiQiJ9LHsicG9zaXRpb24iOjUsInF1ZXN0aW9uIjoiV2hpY2ggSFRUUCBtZXRob2Qgc2hvdWxkIGJlIHVzZWQgdG8gZmV0Y2ggZGF0YSB3aXRob3V0IGNoYW5naW5nIGl0PyIsIm9wdGlvbnMiOnsiQSI6IkdFVCIsIkIiOiJQQVRDSCIsIkMiOiJQVVQiLCJEIjoiREVMRVRFIn0sImNvcnJlY3Rfb3B0aW9uIjoiQSJ9LHsicG9zaXRpb24iOjYsInF1ZXN0aW9uIjoiV2hpY2ggSFRUUCBtZXRob2QgaXMgY29tbW9ubHkgdXNlZCB0byBmdWxseSByZXBsYWNlIGFuIGV4aXN0aW5nIHJlc291cmNlPyIsIm9wdGlvbnMiOnsiQSI6IlBVVCIsIkIiOiJUUkFDRSIsIkMiOiJPUFRJT05TIiwiRCI6IkNPTk5FQ1QifSwiY29ycmVjdF9vcHRpb24iOiJBIn0seyJwb3NpdGlvbiI6NywicXVlc3Rpb24iOiJXaGljaCBIVFRQIG1ldGhvZCBpcyBjb21tb25seSB1c2VkIHRvIHBhcnRpYWxseSB1cGRhdGUgYSByZXNvdXJjZT8iLCJvcHRpb25zIjp7IkEiOiJQT1NUIiwiQiI6IlBBVENIIiwiQyI6IkdFVCIsIkQiOiJIRUFEIn0sImNvcnJlY3Rfb3B0aW9uIjoiQiJ9LHsicG9zaXRpb24iOjgsInF1ZXN0aW9uIjoiV2hhdCBkb2VzIGEgYDQwNGAgcmVzcG9uc2UgdXN1YWxseSBtZWFuPyIsIm9wdGlvbnMiOnsiQSI6IlRoZSB1c2VyIGlzIG5vdCBsb2dnZWQgaW4iLCJCIjoiVGhlIHNlcnZlciBjcmFzaGVkIGR1cmluZyBzdGFydHVwIiwiQyI6IlRoZSByZXF1ZXN0ZWQgcmVzb3VyY2Ugd2FzIG5vdCBmb3VuZCIsIkQiOiJUaGUgYnJvd3NlciBzZW50IGludmFsaWQgSlNPTiJ9LCJjb3JyZWN0X29wdGlvbiI6IkMifSx7InBvc2l0aW9uIjo5LCJxdWVzdGlvbiI6IldoYXQgZG9lcyBhIGA1MDBgIHJlc3BvbnNlIHVzdWFsbHkgbWVhbj8iLCJvcHRpb25zIjp7IkEiOiJUaGVyZSBpcyBhIHNlcnZlci1zaWRlIGVycm9yIiwiQiI6IlRoZSByZXF1ZXN0IHdhcyBzdWNjZXNzZnVsIiwiQyI6IlRoZSBjbGllbnQgbXVzdCBsb2cgaW4gYWdhaW4iLCJEIjoiVGhlIEROUyBsb29rdXAgZmFpbGVkIn0sImNvcnJlY3Rfb3B0aW9uIjoiQSJ9LHsicG9zaXRpb24iOjEwLCJxdWVzdGlvbiI6IldoeSBkbyBBUElzIGNvbW1vbmx5IHVzZSBKU09OPyIsIm9wdGlvbnMiOnsiQSI6Ikl0IGNhbiBvbmx5IGJlIHJlYWQgYnkgUHl0aG9uIHNlcnZlcnMiLCJCIjoiSXQgaXMgYSBsaWdodHdlaWdodCBmb3JtYXQgdGhhdCBpcyBlYXN5IGZvciBjbGllbnRzIGFuZCBzZXJ2ZXJzIHRvIGV4Y2hhbmdlIiwiQyI6Ikl0IGF1dG9tYXRpY2FsbHkgZW5jcnlwdHMgcGFzc3dvcmRzIiwiRCI6Ikl0IHJlcGxhY2VzIFNRTCBpbiBkYXRhYmFzZXMifSwiY29ycmVjdF9vcHRpb24iOiJCIn0seyJwb3NpdGlvbiI6MTEsInF1ZXN0aW9uIjoiV2hhdCBpcyBhbiBBUEkgZW5kcG9pbnQ/Iiwib3B0aW9ucyI6eyJBIjoiQSBDU1MgY2xhc3MgdXNlZCBieSBmcm9udGVuZCBwYWdlcyIsIkIiOiJBIHNwZWNpZmljIFVSTCBwYXRoIHdoZXJlIGEgYmFja2VuZCBleHBvc2VzIGEgcmVzb3VyY2Ugb3IgYWN0aW9uIiwiQyI6IkEgbG9jYWwgZGF0YWJhc2UgYmFja3VwIGZpbGUiLCJEIjoiQSBjb21tYW5kIHRoYXQgb25seSB3b3JrcyBpbiBTd2FnZ2VyIn0sImNvcnJlY3Rfb3B0aW9uIjoiQiJ9LHsicG9zaXRpb24iOjEyLCJxdWVzdGlvbiI6IldoYXQgaXMgdGhlIHJvbGUgb2YgYSBiYWNrZW5kIHNlcnZlciBpbiBhIHdlYiBhcHA/Iiwib3B0aW9ucyI6eyJBIjoiT25seSBkZXNpZ25pbmcgdGhlIHBhZ2UgY29sb3JzIiwiQiI6Ik9ubHkgcmVnaXN0ZXJpbmcgZG9tYWluIG5hbWVzIiwiQyI6IkhhbmRsaW5nIGJ1c2luZXNzIGxvZ2ljLCBkYXRhIHN0b3JhZ2UsIGFuZCBBUEkgcmVzcG9uc2VzIiwiRCI6IlJlcGxhY2luZyB0aGUgdXNlcidzIGJyb3dzZXIifSwiY29ycmVjdF9vcHRpb24iOiJDIn0seyJwb3NpdGlvbiI6MTMsInF1ZXN0aW9uIjoiV2hhdCBpcyB0aGUgbWFpbiBkaWZmZXJlbmNlIGJldHdlZW4gU1FMIGFuZCBOb1NRTCBkYXRhYmFzZXM/Iiwib3B0aW9ucyI6eyJBIjoiU1FMIHVzZXMgc3RydWN0dXJlZCB0YWJsZXMsIHdoaWxlIE5vU1FMIHVzZXMgZmxleGlibGUgZGF0YSBtb2RlbHMiLCJCIjoiU1FMIGlzIGZhc3RlciB0aGFuIE5vU1FMIGluIGFsbCBjYXNlcyIsIkMiOiJOb1NRTCBvbmx5IHdvcmtzIG9uIFdpbmRvd3MiLCJEIjoiU1FMIGNhbm5vdCBzdG9yZSBkYXRhIn0sImNvcnJlY3Rfb3B0aW9uIjoiQSJ9LHsicG9zaXRpb24iOjE0LCJxdWVzdGlvbiI6IldoeSBpcyB2YWxpZGF0aW9uIGltcG9ydGFudCBvbiB0aGUgYmFja2VuZD8iLCJvcHRpb25zIjp7IkEiOiJJdCBsZXRzIENTUyBsb2FkIGZhc3RlciIsIkIiOiJJdCBjaGVja3MgaW5jb21pbmcgZGF0YSBiZWZvcmUgdXNpbmcgb3Igc3RvcmluZyBpdCIsIkMiOiJJdCByZW1vdmVzIHRoZSBuZWVkIGZvciBhIGRhdGFiYXNlIiwiRCI6Ikl0IG1ha2VzIGV2ZXJ5IHJlcXVlc3QgaWRlbXBvdGVudCJ9LCJjb3JyZWN0X29wdGlvbiI6IkIifSx7InBvc2l0aW9uIjoxNSwicXVlc3Rpb24iOiJXaGF0IGlzIFN3YWdnZXIgbWFpbmx5IHVzZWZ1bCBmb3IgaW4gdGhpcyB3b3Jrc2hvcCBhcHA/Iiwib3B0aW9ucyI6eyJBIjoiV3JpdGluZyBTUUwgbWlncmF0aW9ucyBhdXRvbWF0aWNhbGx5IiwiQiI6Ikhvc3Rpbmcgc3RhdGljIEhUTUwgcGFnZXMiLCJDIjoiRXhwbG9yaW5nIGFuZCB0ZXN0aW5nIEFQSSBlbmRwb2ludHMgZnJvbSBnZW5lcmF0ZWQgZG9jdW1lbnRhdGlvbiIsIkQiOiJDcmVhdGluZyBTU0wgY2VydGlmaWNhdGVzIn0sImNvcnJlY3Rfb3B0aW9uIjoiQyJ9XX0="
+)
 
-QUIZ_QUESTIONS = [
-    {
-        "position": 1,
-        "question": "What does DNS mainly do on the internet?",
-        "options": {
-            "A": "Encrypt the data between the browser and the server",
-            "B": "Translate a domain name into an IP address",
-            "C": "Store frontend files in the browser cache",
-            "D": "Create database tables for an application",
-        },
-        "correct_option": "B",
-    },
-    {
-        "position": 2,
-        "question": "Which protocol is commonly used to load a secure website?",
-        "options": {
-            "A": "FTP",
-            "B": "SMTP",
-            "C": "HTTPS",
-            "D": "SSH",
-        },
-        "correct_option": "C",
-    },
-    {
-        "position": 3,
-        "question": "What is the main purpose of HTTPS?",
-        "options": {
-            "A": "To compress JSON responses",
-            "B": "To make a site faster than all HTTP requests",
-            "C": "To secure communication with encryption and certificate validation",
-            "D": "To replace DNS records",
-        },
-        "correct_option": "C",
-    },
-    {
-        "position": 4,
-        "question": "Which HTTP method is usually used to create a new resource?",
-        "options": {
-            "A": "GET",
-            "B": "POST",
-            "C": "DELETE",
-            "D": "HEAD",
-        },
-        "correct_option": "B",
-    },
-    {
-        "position": 5,
-        "question": "Which HTTP method should be used to fetch data without changing it?",
-        "options": {
-            "A": "GET",
-            "B": "PATCH",
-            "C": "PUT",
-            "D": "DELETE",
-        },
-        "correct_option": "A",
-    },
-    {
-        "position": 6,
-        "question": "Which HTTP method is commonly used to fully replace an existing resource?",
-        "options": {
-            "A": "PUT",
-            "B": "TRACE",
-            "C": "OPTIONS",
-            "D": "CONNECT",
-        },
-        "correct_option": "A",
-    },
-    {
-        "position": 7,
-        "question": "Which HTTP method is commonly used to partially update a resource?",
-        "options": {
-            "A": "POST",
-            "B": "PATCH",
-            "C": "GET",
-            "D": "HEAD",
-        },
-        "correct_option": "B",
-    },
-    {
-        "position": 8,
-        "question": "What does a `404` response usually mean?",
-        "options": {
-            "A": "The user is not logged in",
-            "B": "The server crashed during startup",
-            "C": "The requested resource was not found",
-            "D": "The browser sent invalid JSON",
-        },
-        "correct_option": "C",
-    },
-    {
-        "position": 9,
-        "question": "What does a `500` response usually mean?",
-        "options": {
-            "A": "There is a server-side error",
-            "B": "The request was successful",
-            "C": "The client must log in again",
-            "D": "The DNS lookup failed",
-        },
-        "correct_option": "A",
-    },
-    {
-        "position": 10,
-        "question": "Why do APIs commonly use JSON?",
-        "options": {
-            "A": "It can only be read by Python servers",
-            "B": "It is a lightweight format that is easy for clients and servers to exchange",
-            "C": "It automatically encrypts passwords",
-            "D": "It replaces SQL in databases",
-        },
-        "correct_option": "B",
-    },
-    {
-        "position": 11,
-        "question": "What is an API endpoint?",
-        "options": {
-            "A": "A CSS class used by frontend pages",
-            "B": "A specific URL path where a backend exposes a resource or action",
-            "C": "A local database backup file",
-            "D": "A command that only works in Swagger",
-        },
-        "correct_option": "B",
-    },
-    {
-        "position": 12,
-        "question": "What is the role of a backend server in a web app?",
-        "options": {
-            "A": "Only designing the page colors",
-            "B": "Only registering domain names",
-            "C": "Handling business logic, data storage, and API responses",
-            "D": "Replacing the user's browser",
-        },
-        "correct_option": "C",
-    },
-    {
-        "position": 13,
-        "question": "What is the main difference between SQL and NoSQL databases?",
-        "options": {
-            "A": "SQL uses structured tables, while NoSQL uses flexible data models",
-            "B": "SQL is faster than NoSQL in all cases",
-            "C": "NoSQL only works on Windows",
-            "D": "SQL cannot store data"
-        },
-        "correct_option": "A"
-    },
-    {
-        "position": 14,
-        "question": "Why is validation important on the backend?",
-        "options": {
-            "A": "It lets CSS load faster",
-            "B": "It checks incoming data before using or storing it",
-            "C": "It removes the need for a database",
-            "D": "It makes every request idempotent",
-        },
-        "correct_option": "B",
-    },
-    {
-        "position": 15,
-        "question": "What is Swagger mainly useful for in this workshop app?",
-        "options": {
-            "A": "Writing SQL migrations automatically",
-            "B": "Hosting static HTML pages",
-            "C": "Exploring and testing API endpoints from generated documentation",
-            "D": "Creating SSL certificates",
-        },
-        "correct_option": "C",
-    },
-]
+
+def _load_quiz_data():
+    raw = base64.b64decode(ENCODED_QUIZ_DATA.encode("ascii"))
+    return json.loads(raw.decode("utf-8"))
+
+
+_QUIZ_DATA = _load_quiz_data()
+QUIZ_SESSION = _QUIZ_DATA["session"]
+QUIZ_QUESTIONS = _QUIZ_DATA["questions"]
 
 
 def get_quiz_session_or_404(session_id: int):
@@ -199,6 +41,20 @@ def get_quiz_question_by_position_or_404(session_id: int, question_position: int
                     {"key": "C", "text": item["options"]["C"]},
                     {"key": "D", "text": item["options"]["D"]},
                 ],
-                "correct_option": item["correct_option"],
+            }
+    raise HTTPException(status_code=404, detail="Quiz question not found")
+
+
+def check_quiz_answer_or_404(session_id: int, question_position: int, selected_option: str):
+    get_quiz_session_or_404(session_id)
+    chosen = selected_option.strip().upper()
+    if chosen not in {"A", "B", "C", "D"}:
+        raise HTTPException(status_code=400, detail="selected_option must be one of A, B, C, D")
+
+    for item in QUIZ_QUESTIONS:
+        if item["position"] == question_position:
+            return {
+                "position": question_position,
+                "correct": item["correct_option"] == chosen,
             }
     raise HTTPException(status_code=404, detail="Quiz question not found")

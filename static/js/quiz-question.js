@@ -64,7 +64,7 @@ function lockOptions() {
   });
 }
 
-function handleAnswerChange(event) {
+async function handleAnswerChange(event) {
   if (answered) {
     return;
   }
@@ -73,12 +73,25 @@ function handleAnswerChange(event) {
     return;
   }
   answered = true;
-  if (target.value === currentQuestion.correct_option) {
+  const response = await fetch(apiUrl(`/project4/sessions/1/quiz/${currentId}/check`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ selected_option: target.value }),
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    quizFeedback.textContent = payload.detail || "Could not check answer.";
+    nextButton.disabled = false;
+    lockOptions();
+    return;
+  }
+
+  if (payload.correct) {
     const nextScore = getScore() + 1;
     setScore(nextScore);
     quizFeedback.textContent = "Correct.";
   } else {
-    quizFeedback.textContent = `Wrong. Correct answer: ${currentQuestion.correct_option}.`;
+    quizFeedback.textContent = "Wrong.";
   }
   nextButton.disabled = false;
   lockOptions();
